@@ -1,55 +1,58 @@
 import React from 'react'
 import { Sudoku } from "../types/Sudoku"
-import { makeStyles } from "@material-ui/core/styles"
-import { SudokuConstraint } from "../types/SudokuConstraint"
+import { createStyles, makeStyles, Theme } from "@material-ui/core/styles"
 import { SudokuHelper } from "../types/SudokuHelper"
+import { TSudokuValue } from "../types/SudokuValue"
+import { IconButton } from "@material-ui/core"
+import { SudokuOptions } from "../types/SudokuOptions"
 
-const useStyles = makeStyles({
-    root: {
-        fontSize: "9px"
-    },
-});
+const useStyles = makeStyles((theme: Theme) =>
+    createStyles({
+        root: {
+            fontSize: "9px"
+        },
+        button: {
+        },
+        possibleValues: {
+            float: "left"
+        }
+    }),
+);
 
 export interface SudokuHintProps {
     sudoku: Sudoku,
-    helper: SudokuHelper,
+    sudokuHelper: SudokuHelper,
+    options: SudokuOptions,
     row: number,
-    col: number
+    col: number,
+    onChange: (row: number, col: number, value: TSudokuValue) => TSudokuValue
 }
 
 function SudokuHint(props: SudokuHintProps) {
     const classes = useStyles();
-    const { sudoku, row, col, helper } = props
-    const value = sudoku.contents[row][col]
+    const { sudoku, sudokuHelper, options, row, col } = props
+    const index = {row, col}
+    const value = sudoku.getValue(index)
 
-    if (value !== null) {
+    const mandatoryValue = sudokuHelper.mandatoryValue(index)
+
+    if (value !== null || !options.showHint || mandatoryValue === null) {
+        // Nothing for existing values
         return null
     }
 
-    const highlightStyle = {
-        color: "red"
+    const onProposalClick = (proposal:number) => {
+        props.onChange(row, col, proposal)
     }
-
-    const foundStyle = {
-        color: "green"
-    }
-
-    const hints = helper.hints[row][col]
-    const isSpecial = helper.isSinglePossibility(row, col)
-    const highlight = hints.length === 1 || isSpecial
-    const attention = isSpecial.includes("possibility") ? "!" : ""
 
     return (
-        <div className={classes.root}>
-            {hints.map(v => {
-                const style = attention ? foundStyle : highlight ? highlightStyle : {}
-                return (
-                    <span key={v} title={isSpecial} style={style}>
-                    {v}
-                    </span>
-                )
-            })}
-        </div>
+        <IconButton
+            className={classes.button}
+            size={"small"}
+            color={"secondary"}
+            onClick={() => onProposalClick(mandatoryValue)}>
+            ?
+        </IconButton>
     )
 }
 

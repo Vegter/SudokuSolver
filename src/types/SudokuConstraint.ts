@@ -1,90 +1,117 @@
-import { Sudoku } from "./Sudoku"
+import { TSudokuValue } from "./SudokuValue"
+import { Sudoku, SudokuIndex } from "./Sudoku"
+import { range } from "../utils"
 
 export abstract class SudokuConstraint {
-    public sudoku: Sudoku
+    abstract appliesTo(index: SudokuIndex): boolean
 
-    constructor(sudoku: Sudoku) {
-        this.sudoku = sudoku
+    abstract constraintIndexes(sudoku: Sudoku): SudokuIndex[]
+
+    blockedValues(sudoku: Sudoku, index: SudokuIndex): TSudokuValue[] {
+        if (this.appliesTo(index)) {
+            const value = sudoku.getValue(index)
+            return this.constraintIndexes(sudoku)
+                .map(index => sudoku.getValue(index))
+                .filter(v => v !== null && v !== value)
+        } else {
+            return []
+        }
     }
 
-    isValid(value: number): boolean {
-        for (let [row, col] of this.rowCols()) {
-            if (this.sudoku.contents[row][col] === value) {
-                return false
+    allowsValue(sudoku: Sudoku, index: SudokuIndex, value: TSudokuValue) {
+        if (value === null) {
+            // It is always possible to clear a value
+            return true
+        } else if (this.appliesTo(index)) {
+            for (let constraintIndex of this.constraintIndexes(sudoku)) {
+                if (constraintIndex.row === index.row && constraintIndex.col === index.col) {
+                    // Overwrite of own value should be possible
+                    continue
+                }
+                if (sudoku.getValue(constraintIndex) === value) {
+                    // Value is already present in the constrained area
+                    return false
+                }
             }
         }
         return true
     }
-
-    abstract appliesTo(row: number, col: number): boolean
-
-    abstract rowCols(): number[][]
 }
 
 export class SudokuRowConstraint extends SudokuConstraint {
-    public row: number
+    private _row: number
 
-    constructor(sudoku: Sudoku, row: number) {
-        super(sudoku)
-        this.row = row
+    constructor(row: number) {
+        super()
+        this._row = row
     }
 
-    appliesTo(row: number, col: number): boolean {
-        return row === this.row
+    appliesTo(index: SudokuIndex): boolean {
+        return index.row === this._row
     }
 
-    rowCols(): number[][] {
-        const rowCols = []
-        for (let col = 0; col < this.sudoku.nCols; col++) {
-            rowCols.push([this.row, col])
-        }
-        return rowCols
+    constraintIndexes(sudoku: Sudoku): SudokuIndex[] {
+        return sudoku.colIndexes.map(col => ({row: this._row, col}))
     }
 }
 
 export class SudokuColumnConstraint extends SudokuConstraint {
-    public col: number
+    private _col: number
 
-    constructor(sudoku: Sudoku, col: number) {
-        super(sudoku)
-        this.col = col
+    constructor(col: number) {
+        super()
+        this._col = col
     }
 
-    appliesTo(row: number, col: number): boolean {
-        return col === this.col
+    appliesTo(index: SudokuIndex): boolean {
+        return index.col === this._col
     }
 
-    rowCols(): number[][] {
-        const rowCols = []
-        for (let row = 0; row < this.sudoku.nRows; row++) {
-            rowCols.push([row, this.col])
-        }
-        return rowCols
+    constraintIndexes(sudoku: Sudoku): SudokuIndex[] {
+        return sudoku.rowIndexes.map(row => ({row, col: this._col}))
     }
 }
 
 export class SudokuAreaConstraint extends SudokuConstraint {
-    public row: number
-    public col: number
+    private _row: number
+    private _col: number
+    private _size: number
 
-    constructor(sudoku: Sudoku, row: number, col: number) {
-        super(sudoku)
-        this.row = row
-        this.col = col
+    constructor(row: number, col: number, size: number = 3) {
+        super()
+        this._row = row
+        this._col = col
+        this._size = size
     }
 
-    appliesTo(row: number, col: number): boolean {
-        return this.row <= row && row < this.row + 3 &&
-            this.col <= col && col < this.col + 3
+    get firstRow(): number {
+        return this._row
     }
 
-    rowCols(): number[][] {
-        const rowCols = []
-        for (let row = this.row; row < this.row + 3; row++) {
-            for (let col = this.col; col < this.col + 3; col++) {
-                rowCols.push([row, col])
-            }
-        }
-        return rowCols
+    get lastRow(): number {
+        return this._row + this._size - 1
+    }
+
+    get firstCol(): number {
+        return this._col
+    }
+
+    get lastCol(): number {
+        return this._col + this._size - 1
+    }
+
+    appliesTo(index: SudokuIndex): boolean {
+        return this._row <= index.row && index.row < this._row + this._size &&
+            this._col <= index.col && index.col < this._col + this._size
+    }
+
+    constraintIndexes(sudoku: Sudoku): SudokuIndex[] {
+        const indexes: SudokuIndex[] = []
+        range(this._row, this._row + this._size).forEach(row => {
+            range(this._col, this._col + this._size).forEach(col => {
+                indexes.push({row, col})
+            })
+        })
+        return indexes
     }
 }

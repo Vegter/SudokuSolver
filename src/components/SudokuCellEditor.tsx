@@ -2,6 +2,8 @@ import React, { ChangeEvent, useState } from 'react'
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import { Input } from "@material-ui/core"
 import { Sudoku } from "../types/Sudoku"
+import { TSudokuValue } from "../types/SudokuValue"
+import { SudokuOptions } from "../types/SudokuOptions"
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -17,32 +19,26 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export interface SudokuCellEditorProps {
     sudoku: Sudoku,
+    options: SudokuOptions,
     row: number,
     col: number,
-    onChange: () => void
+    onChange: (row: number, col: number, value: TSudokuValue) => TSudokuValue
 }
 
 export default function SudokuCellEditor(props: SudokuCellEditorProps) {
-    const { sudoku, row, col } = props
+    const { sudoku, options, row, col } = props
 
     const classes = useStyles();
-    const [value, setValue] = useState(sudoku.contents[row][col] || "")
+    const [value, setValue] = useState(sudoku.getValue({row, col}) || "")
 
     const onChange = (event: ChangeEvent<HTMLInputElement>): void => {
-        let newValue = Number(event.target.value)
-        if (isNaN(newValue)) {
-            setValue("")
-        } else {
-            newValue = newValue % 10
-            if (1 <= newValue && newValue <= 9) {
-                sudoku.contents[row][col] = newValue
-                setValue(newValue)
-            } else {
-                sudoku.contents[row][col] = null
-                setValue("")
-            }
-        }
-        props.onChange()
+        const newValue: TSudokuValue = Number(event.target.value)
+        const value = props.onChange(row, col, isNaN(newValue) ? null : newValue)
+        setValue(value || "")
+    }
+
+    if (options.showHint && !value) {
+        return null
     }
 
     return (
