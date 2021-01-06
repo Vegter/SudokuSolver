@@ -1,6 +1,6 @@
 import { Sudoku } from "./Sudoku"
 import { AssertionError } from "assert"
-import { SudokuValue } from "./SudokuValue"
+import { SudokuCell } from "./SudokuCell"
 import { SudokuAreaConstraint, SudokuColumnConstraint, SudokuRowConstraint } from "./SudokuConstraint"
 
 test("create Sudokus", () => {
@@ -16,7 +16,7 @@ test("create Sudokus", () => {
             const index = {row, col}
             expect(s.isValidIndex(index)).toEqual(true)
             expect(s.getValue(index)).toEqual(null)
-            const values: (number | null)[] = SudokuValue.ValidValues
+            const values: (number | null)[] = SudokuCell.ValidValues
             values.push(null)
             values.forEach(v => {
                 s.setValue(index, v)
@@ -60,8 +60,8 @@ test("keep sudoku consistent", () => {
     // r rc r r
     // x c  a a
     // x c  a a
-    const rowConstraint = new SudokuRowConstraint(1)
-    const columnConstraint = new SudokuColumnConstraint(1)
+    const rowConstraint = new SudokuRowConstraint(1, 0, 3)
+    const columnConstraint = new SudokuColumnConstraint(1, 0, 3)
     const areaConstraint = new SudokuAreaConstraint(2,2,2)
 
     let s = new Sudoku(4, 4, [
@@ -86,8 +86,8 @@ test("keep sudoku consistent", () => {
     expect(s.isValidValue({row:1, col: 1}, 1)).toEqual(false)
     expect(s.blockedValues({row: 0, col: 1})).toEqual([])
     expect(s.blockedValues({row: 1, col: 1})).toEqual([1])
-    expect(s.allowedValues({row: 0, col: 1})).toEqual(SudokuValue.ValidValues)
-    expect(s.allowedValues({row: 1, col: 1})).toEqual(SudokuValue.ValidValues.filter(v => v !== 1))
+    expect(s.allowedValues({row: 0, col: 1})).toEqual(SudokuCell.ValidValues)
+    expect(s.allowedValues({row: 1, col: 1})).toEqual(SudokuCell.ValidValues.filter(v => v !== 1))
 
     // Row constraint
     s.clear()

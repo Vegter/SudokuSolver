@@ -2,7 +2,7 @@ import React from 'react'
 import { Sudoku } from "../types/Sudoku"
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles"
 import { SudokuHelper } from "../types/SudokuHelper"
-import { TSudokuValue } from "../types/SudokuValue"
+import { SudokuValue } from "../types/SudokuCell"
 import { IconButton } from "@material-ui/core"
 import { SudokuOptions } from "../types/SudokuOptions"
 
@@ -25,7 +25,7 @@ export interface SudokuHintProps {
     options: SudokuOptions,
     row: number,
     col: number,
-    onChange: (row: number, col: number, value: TSudokuValue) => TSudokuValue
+    onChange: (row: number, col: number, value: SudokuValue) => SudokuValue
 }
 
 function SudokuHint(props: SudokuHintProps) {

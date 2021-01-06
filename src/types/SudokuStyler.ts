@@ -14,9 +14,7 @@ export function getStyle(sudoku: Sudoku, row: number, col: number) {
     for (let constraint of sudoku.constraints) {
         if (constraint instanceof SudokuAreaConstraint) {
             if ([1, 5].includes(constraint.firstRow) || [1,5].includes(constraint.firstCol)) {
-                const inArea = constraint.firstRow <= row && row <= constraint.lastRow &&
-                    constraint.firstCol <= col && col <= constraint.lastCol
-                if (inArea) {
+                if (constraint.appliesTo({row, col})) {
                     style.backgroundColor = "lightGrey"
                 }
                 continue

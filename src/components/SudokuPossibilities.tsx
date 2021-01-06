@@ -2,7 +2,7 @@ import React from 'react'
 import { Sudoku } from "../types/Sudoku"
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles"
 import { SudokuHelper } from "../types/SudokuHelper"
-import { SudokuValue } from "../types/SudokuValue"
+import { SudokuCell } from "../types/SudokuCell"
 import { SudokuOptions } from "../types/SudokuOptions"
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -39,7 +39,7 @@ function SudokuPossibilities(props: SudokuPossibilitiesProps) {
     }
     const allowedValues = sudokuHelper.allowedValues(index)
 
-    const displayValues = SudokuValue.ValidValues.map(v => {
+    const displayValues = SudokuCell.ValidValues.map(v => {
         return allowedValues.includes(v) ? v : " "
     }).join("")
     const lines = [0, 3, 6].map(n => displayValues.substr(n, 3))

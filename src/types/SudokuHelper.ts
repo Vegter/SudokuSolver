@@ -1,9 +1,9 @@
 import { Sudoku, SudokuIndex } from "./Sudoku"
-import { TSudokuValue } from "./SudokuValue"
+import { SudokuValue } from "./SudokuCell"
 
 type IndexInfo = {
-    allowedValues: TSudokuValue[]
-    mandatoryValue: TSudokuValue
+    allowedValues: SudokuValue[]
+    mandatoryValue: SudokuValue
 }
 
 export class SudokuHelper {
@@ -31,31 +31,27 @@ export class SudokuHelper {
     }
 
     public analyze() {
-        // Determine allowed values
-        this._sudoku.rowIndexes.forEach(row => {
-            this._sudoku.colIndexes.forEach(col => {
-                const value = this._sudoku.getValue({row, col})
-                if (value === null) {
-                    this._info[row][col].allowedValues = this._sudoku.allowedValues({row, col})
-                } else {
-                    this._info[row][col].allowedValues = [value]
-                }
-            })
-        })
+        for (let index of this._sudoku.indexes) {
+            const {row, col} = index
+            const value = this._sudoku.getValue(index)
+            if (value === null) {
+                this._info[row][col].allowedValues = this._sudoku.allowedValues(index)
+            } else {
+                this._info[row][col].allowedValues = [value]
+            }
+        }
 
         // Find any mandatory values
-        this._sudoku.rowIndexes.forEach(row => {
-            this._sudoku.colIndexes.forEach(col => {
-                const index = {row, col}
-                if (this.allowedValues(index).length === 1) {
-                    this._info[row][col].mandatoryValue = this.allowedValues(index)[0]
-                } else if (this._sudoku.getValue(index) === null) {
-                    this.setMandatoryValue(index)
-                } else {
-                    this._info[row][col].mandatoryValue = null
-                }
-            })
-        })
+        for (let index of this._sudoku.indexes) {
+            const {row, col} = index
+            if (this.allowedValues(index).length === 1) {
+                this._info[row][col].mandatoryValue = this.allowedValues(index)[0]
+            } else if (this._sudoku.getValue(index) === null) {
+                this.setMandatoryValue(index)
+            } else {
+                this._info[row][col].mandatoryValue = null
+            }
+        }
     }
 
     private setMandatoryValue(index: SudokuIndex) {
@@ -77,6 +73,15 @@ export class SudokuHelper {
                     info.mandatoryValue = value
                     return
                 }
+            }
+        }
+    }
+
+    public getHint(): [SudokuIndex, SudokuValue] | undefined {
+        for (let index of this._sudoku.indexes) {
+            const mandatoryValue = this.mandatoryValue(index)
+            if (this._sudoku.getValue(index) === null && mandatoryValue !== null) {
+                return [index, mandatoryValue]
             }
         }
     }

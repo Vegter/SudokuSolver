@@ -5,17 +5,20 @@ export interface SudokuVariant {
     id: string
     name: string
     create: () => Sudoku
+    fill: (sudoku: Sudoku) => void
 }
 
 export const SudokuVariants = {
     Basic: {
         id: "Basic",
         name: "Basic Sudoku",
-        create: SudokuFactory.createBasicSudoku
+        create: SudokuFactory.createBasicSudoku,
+        fill: SudokuFactory.fillBasicSudoku
     },
     NRC: {
         id: "NRC",
         name: "NRC Sudoku",
-        create: SudokuFactory.createNRCSudoku
+        create: SudokuFactory.createNRCSudoku,
+        fill: SudokuFactory.fillNRCSudoku
     }
 }

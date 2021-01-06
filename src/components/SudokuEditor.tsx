@@ -4,7 +4,7 @@ import { Sudoku } from "../types/Sudoku"
 import SudokuCellEditor from "./SudokuCellEditor"
 import SudokuHint from "./SudokuHint"
 import { SudokuHelper } from "../types/SudokuHelper"
-import { TSudokuValue } from "../types/SudokuValue"
+import { SudokuValue } from "../types/SudokuCell"
 import SudokuOptionsEditor from "./SudokuOptionsEditor"
 import SudokuSolver from "./SudokuSolver"
 import SudokuEraser from "./SudokuEraser"
@@ -58,11 +58,11 @@ export function SudokuEditor(props:SudokuEditorProps) {
     });
     const classes = useStyles();
 
-    const getKey = (row: number, col: number, value: TSudokuValue) => {
+    const getKey = (row: number, col: number, value: SudokuValue) => {
         return `${row}.${col}.${value}`
     }
 
-    const onChange = (row: number, col: number, value: TSudokuValue) => {
+    const onChange = (row: number, col: number, value: SudokuValue) => {
         const index = {row, col}
         if (sudoku.isValidValue(index, value)) {
             sudoku.setValue(index, value)
@@ -87,15 +87,15 @@ export function SudokuEditor(props:SudokuEditorProps) {
         setChange("Clear")
     }
 
-    const values: number[][] = []
-    sudoku.rowIndexes.forEach(row => {
-        sudoku.colIndexes.forEach(col => {
-            const value = sudoku.getValue({row, col})
-            if (value !== null) {
-                values.push([row, col, value])
-            }
-        })
-    })
+    // const values: number[][] = []
+    // sudoku.rowIndexes.forEach(row => {
+    //     sudoku.colIndexes.forEach(col => {
+    //         const value = sudoku.getValue({row, col})
+    //         if (value !== null) {
+    //             values.push([row, col, value])
+    //         }
+    //     })
+    // })
 
     return (
         <div>
@@ -122,7 +122,7 @@ export function SudokuEditor(props:SudokuEditorProps) {
                                                     row={row} col={col}
                                                     onChange={onChange}/>
                                         <SudokuCellEditor sudoku={sudoku}
-                                                          options={options}
+                                                          sudokuOptions={options}
                                                           row={row} col={col}
                                                           onChange={onChange}/>
                                     </td>
@@ -135,7 +135,7 @@ export function SudokuEditor(props:SudokuEditorProps) {
             </table>
             <SudokuOptionsEditor options={options} onOption={onOption}/>
             <p>
-                <SudokuSolver sudoku={sudoku} sudokuHelper={helper} onChange={onChange}/>
+                <SudokuSolver sudokuHelper={helper} onChange={onChange}/>
                 &nbsp;
                 <SudokuEraser onErase={onErase}/>
             </p>

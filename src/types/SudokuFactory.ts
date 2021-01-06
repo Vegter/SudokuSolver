@@ -1,6 +1,7 @@
 import { Sudoku } from "./Sudoku"
 import { range } from "../utils"
 import { SudokuAreaConstraint, SudokuColumnConstraint, SudokuConstraint, SudokuRowConstraint } from "./SudokuConstraint"
+import { SudokuVariant } from "./SudokuVariants"
 
 export class SudokuFactory {
     private constructor() {
@@ -22,6 +23,14 @@ export class SudokuFactory {
         const colConstraints = range(nCols).map(c => new SudokuColumnConstraint(c))
         const areaConstraints = SudokuFactory.getAreaConstraints([0, 3, 6])
         return [...rowConstraints, ...colConstraints, ...areaConstraints]
+    }
+
+    public static create(variant: SudokuVariant, fill: boolean) {
+        const sudoku = variant.create()
+        if (fill) {
+            variant.fill(sudoku)
+        }
+        return sudoku
     }
 
     public static createBasicSudoku(): Sudoku {

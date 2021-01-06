@@ -1,28 +1,67 @@
-import { TSudokuValue } from "./SudokuValue"
+import { SudokuValue } from "./SudokuCell"
 import { Sudoku, SudokuIndex } from "./Sudoku"
 import { range } from "../utils"
 
+export type SudokuArea = {
+    from: SudokuIndex
+    to: SudokuIndex
+}
+
 export abstract class SudokuConstraint {
-    abstract appliesTo(index: SudokuIndex): boolean
+    private readonly _area: SudokuArea
 
-    abstract constraintIndexes(sudoku: Sudoku): SudokuIndex[]
+    protected constructor(area: SudokuArea) {
+        this._area = area
+    }
 
-    blockedValues(sudoku: Sudoku, index: SudokuIndex): TSudokuValue[] {
+    get firstRow(): number {
+        return this._area.from.row
+    }
+
+    get lastRow(): number {
+        return this._area.to.row
+    }
+
+    get firstCol(): number {
+        return this._area.from.col
+    }
+
+    get lastCol(): number {
+        return this._area.to.col
+    }
+
+    appliesTo(index: SudokuIndex): boolean {
+        return this.firstRow <= index.row && index.row <= this.lastRow &&
+               this.firstCol <= index.col && index.col <= this.lastCol
+    }
+
+    constraintIndexes(sudoku: Sudoku): SudokuIndex[] {
+        let indexes = []
+        for (let row of range(this.firstRow, this.lastRow + 1)) {
+            for (let col of range(this.firstCol, this.lastCol + 1)) {
+                indexes.push({row, col})
+            }
+        }
+        return indexes
+    }
+
+    blockedValues(sudoku: Sudoku, index: SudokuIndex): SudokuValue[] {
         if (this.appliesTo(index)) {
-            const value = sudoku.getValue(index)
+            const value = sudoku.getValue(index)    // don't block current value
             return this.constraintIndexes(sudoku)
                 .map(index => sudoku.getValue(index))
-                .filter(v => v !== null && v !== value)
+                .filter(v => !(v === null || v === value))
         } else {
             return []
         }
     }
 
-    allowsValue(sudoku: Sudoku, index: SudokuIndex, value: TSudokuValue) {
+    allowsValue(sudoku: Sudoku, index: SudokuIndex, value: SudokuValue) {
         if (value === null) {
             // It is always possible to clear a value
             return true
         } else if (this.appliesTo(index)) {
+            // Check constraint
             for (let constraintIndex of this.constraintIndexes(sudoku)) {
                 if (constraintIndex.row === index.row && constraintIndex.col === index.col) {
                     // Overwrite of own value should be possible
@@ -39,79 +78,19 @@ export abstract class SudokuConstraint {
 }
 
 export class SudokuRowConstraint extends SudokuConstraint {
-    private _row: number
-
-    constructor(row: number) {
-        super()
-        this._row = row
-    }
-
-    appliesTo(index: SudokuIndex): boolean {
-        return index.row === this._row
-    }
-
-    constraintIndexes(sudoku: Sudoku): SudokuIndex[] {
-        return sudoku.colIndexes.map(col => ({row: this._row, col}))
+    constructor(row: number, colFrom: number = 0, colTo: number = 8) {
+        super({from: {row, col: colFrom}, to: {row, col: colTo}})
     }
 }
 
 export class SudokuColumnConstraint extends SudokuConstraint {
-    private _col: number
-
-    constructor(col: number) {
-        super()
-        this._col = col
-    }
-
-    appliesTo(index: SudokuIndex): boolean {
-        return index.col === this._col
-    }
-
-    constraintIndexes(sudoku: Sudoku): SudokuIndex[] {
-        return sudoku.rowIndexes.map(row => ({row, col: this._col}))
+    constructor(col: number, rowFrom: number = 0, rowTo: number = 8) {
+        super({from: {row: rowFrom, col}, to: {row: rowTo, col}})
     }
 }
 
 export class SudokuAreaConstraint extends SudokuConstraint {
-    private _row: number
-    private _col: number
-    private _size: number
-
     constructor(row: number, col: number, size: number = 3) {
-        super()
-        this._row = row
-        this._col = col
-        this._size = size
-    }
-
-    get firstRow(): number {
-        return this._row
-    }
-
-    get lastRow(): number {
-        return this._row + this._size - 1
-    }
-
-    get firstCol(): number {
-        return this._col
-    }
-
-    get lastCol(): number {
-        return this._col + this._size - 1
-    }
-
-    appliesTo(index: SudokuIndex): boolean {
-        return this._row <= index.row && index.row < this._row + this._size &&
-            this._col <= index.col && index.col < this._col + this._size
-    }
-
-    constraintIndexes(sudoku: Sudoku): SudokuIndex[] {
-        const indexes: SudokuIndex[] = []
-        range(this._row, this._row + this._size).forEach(row => {
-            range(this._col, this._col + this._size).forEach(col => {
-                indexes.push({row, col})
-            })
-        })
-        return indexes
+        super({from: {row, col}, to: {row: row + size - 1, col: col + size - 1}})
     }
 }
