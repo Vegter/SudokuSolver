@@ -17,8 +17,8 @@ export interface SudokuEditorProps {
     sudoku: Sudoku,
 }
 
-const CELL_WIDTH = 40
-const CELL_HEIGHT = 40
+const CELL_WIDTH = 35
+const CELL_HEIGHT = 35
 
 export function SudokuEditor(props:SudokuEditorProps) {
     const [change, setChange] = useState("")

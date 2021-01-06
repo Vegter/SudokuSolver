@@ -20,7 +20,7 @@ export default function SudokuApp() {
     }
 
     return (
-        <Paper elevation={3} style={{width: 450}}>
+        <Paper elevation={3} style={{width: 375}}>
             <Grid container
                   direction={"column"}
                   justify={"space-around"}
