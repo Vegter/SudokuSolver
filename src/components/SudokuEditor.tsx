@@ -78,23 +78,9 @@ export function SudokuEditor(props:SudokuEditorProps) {
         setChange("Clear")
     }
 
-    // const values: number[][] = []
-    // sudoku.rowIndexes.forEach(row => {
-    //     sudoku.colIndexes.forEach(col => {
-    //         const value = sudoku.getValue({row, col})
-    //         if (value !== null) {
-    //             values.push([row, col, value])
-    //         }
-    //     })
-    // })
-    // {/*<p>*/}
-    // {/*    {values.map(value => (*/}
-    // {/*        <div >*/}
-    // {/*            [{value.join(", ")}],*/}
-    // {/*        </div>*/}
-    // {/*    ))}*/}
-    // {/*</p>*/}
-
+    const values = sudoku.indexes
+        .filter(index => sudoku.getValue(index) !== null)
+        .map(index => [index.row, index.col, sudoku.getValue(index)])
 
     return (
         <div>
@@ -160,6 +146,15 @@ export function SudokuEditor(props:SudokuEditorProps) {
             </div>
 
             </Grid>
+
+            <Box m={2}>
+                {values.map(value => (
+                    <div >
+                        [{value.join(", ")}],
+                    </div>
+                ))}
+            </Box>
+
 
         </div>
     );

@@ -50,6 +50,13 @@ export class SudokuHelper {
                 this.setMandatoryValue(index)
             }
         }
+
+        // Find any single column/row values
+        for (let index of this._sudoku.indexes) {
+            if (this._sudoku.getValue(index) === null) {
+                this.isSingleRowColumnValue(index)
+            }
+        }
     }
 
     private setMandatoryValue(index: SudokuIndex) {
@@ -71,6 +78,27 @@ export class SudokuHelper {
                     info.mandatoryValue = value
                     return
                 }
+            }
+        }
+    }
+
+    private isSingleRowColumnValue(index: SudokuIndex) {
+        const info = this.getInfo(index)
+        const constraints = this._sudoku.constraints.filter(c => c.appliesTo(index))
+        for (let value of info.allowedValues) {
+            // Try finding a value with all possible values on one row or one column
+            let rows = new Set()
+            let cols = new Set()
+            for (let constraint of constraints) {
+                for (let constraintIndex of constraint.constraintIndexes(this._sudoku)) {
+                    if (this.getInfo(constraintIndex).allowedValues.includes(value)) {
+                        rows.add(constraintIndex.row)
+                        cols.add(constraintIndex.col)
+                    }
+                }
+            }
+            if (rows.size === 2 || cols.size === 2) {
+                console.log("Single row/column", index, value, rows, cols)
             }
         }
     }
