@@ -4,10 +4,6 @@ import { SudokuAreaConstraint, SudokuColumnConstraint, SudokuConstraint, SudokuR
 import { SudokuVariant } from "./SudokuVariants"
 
 export class SudokuFactory {
-    private constructor() {
-        // Don't instantiate
-    }
-
     private static getAreaConstraints(areas: number[]): SudokuConstraint[] {
         const areaConstraints: SudokuConstraint[] = []
         areas.forEach(row => {

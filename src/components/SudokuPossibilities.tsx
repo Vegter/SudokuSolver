@@ -3,7 +3,7 @@ import { Sudoku, SudokuIndex } from "../types/Sudoku"
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles"
 import { SudokuHelper } from "../types/SudokuHelper"
 import { SudokuCell } from "../types/SudokuCell"
-import { SudokuOptions } from "../types/SudokuOptions"
+import { SudokuOptions } from "../config"
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({

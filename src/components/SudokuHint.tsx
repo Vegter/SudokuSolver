@@ -4,18 +4,17 @@ import { createStyles, makeStyles, Theme } from "@material-ui/core/styles"
 import { SudokuHelper } from "../types/SudokuHelper"
 import { SudokuValue } from "../types/SudokuCell"
 import { IconButton } from "@material-ui/core"
-import { SudokuOptions } from "../types/SudokuOptions"
+import { SudokuOptions } from "../config"
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
         root: {
-            fontSize: "9px"
+            position: "absolute",
+            top: 7,
+            left: 8,
+            textAlign: "center",
+            marginLeft: "2px",
         },
-        button: {
-        },
-        possibleValues: {
-            float: "left"
-        }
     }),
 );
 
@@ -45,7 +44,7 @@ function SudokuHint(props: SudokuHintProps) {
 
     return (
         <IconButton
-            className={classes.button}
+            className={classes.root}
             size={"small"}
             color={"secondary"}
             onClick={() => onProposalClick(mandatoryValue)}>

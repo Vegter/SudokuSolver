@@ -46,10 +46,8 @@ export class SudokuHelper {
             const {row, col} = index
             if (this.allowedValues(index).length === 1) {
                 this._info[row][col].mandatoryValue = this.allowedValues(index)[0]
-            } else if (this._sudoku.getValue(index) === null) {
-                this.setMandatoryValue(index)
             } else {
-                this._info[row][col].mandatoryValue = null
+                this.setMandatoryValue(index)
             }
         }
     }

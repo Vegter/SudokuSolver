@@ -5,7 +5,7 @@ import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 
 import { Sudoku, SudokuIndex } from "../types/Sudoku"
 import { SudokuValue } from "../types/SudokuCell"
-import { SudokuOptions } from "../types/SudokuOptions"
+import { SudokuOptions } from "../config"
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({

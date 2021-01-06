@@ -8,7 +8,7 @@ import { SudokuValue } from "../types/SudokuCell"
 import SudokuOptionsEditor from "./SudokuOptionsEditor"
 import SudokuSolver from "./SudokuSolver"
 import SudokuEraser from "./SudokuEraser"
-import { SudokuOptions } from "../types/SudokuOptions"
+import { Default } from "../config"
 import SudokuPossibilities from "./SudokuPossibilities"
 import { getStyle } from "../types/SudokuStyler"
 
@@ -21,10 +21,7 @@ const CELL_HEIGHT = 40
 
 export function SudokuEditor(props:SudokuEditorProps) {
     const [change, setChange] = useState("")
-    const [options, setOptions] = useState({
-        showPossibleValues: false,
-        showHint: false
-    } as SudokuOptions)
+    const [options, setOptions] = useState(Default.options)
 
     const { sudoku } = props
 
@@ -37,8 +34,6 @@ export function SudokuEditor(props:SudokuEditorProps) {
             borderSpacing: 0,
             width: sudoku.nCols * CELL_WIDTH,
             height: sudoku.nRows * CELL_HEIGHT,
-            // maxWidth: sudoku.nCols * CELL_WIDTH,
-            // maxHeight: sudoku.nRows * CELL_HEIGHT
         },
         tableCell: {
             position: "relative",
@@ -49,11 +44,7 @@ export function SudokuEditor(props:SudokuEditorProps) {
             textAlign: "center",
             verticalAlign: "center",
             width: CELL_WIDTH,
-            // minWidth: CELL_WIDTH,
-            // maxWidth: CELL_WIDTH,
             height: CELL_HEIGHT,
-            // minHeight: CELL_HEIGHT,
-            // maxHeight: CELL_HEIGHT
         },
     });
     const classes = useStyles();
