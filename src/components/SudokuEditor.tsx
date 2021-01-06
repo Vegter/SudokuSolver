@@ -11,6 +11,7 @@ import SudokuEraser from "./SudokuEraser"
 import { Default } from "../config"
 import SudokuPossibilities from "./SudokuPossibilities"
 import { getStyle } from "../types/SudokuStyler"
+import { Box, Grid } from "@material-ui/core"
 
 export interface SudokuEditorProps {
     sudoku: Sudoku,
@@ -30,10 +31,10 @@ export function SudokuEditor(props:SudokuEditorProps) {
 
     const useStyles = makeStyles({
         table: {
+            marginLeft: "auto",
+            marginRight: "auto",
             border: "1px solid black",
             borderSpacing: 0,
-            width: sudoku.nCols * CELL_WIDTH,
-            height: sudoku.nRows * CELL_HEIGHT,
         },
         tableCell: {
             position: "relative",
@@ -86,10 +87,22 @@ export function SudokuEditor(props:SudokuEditorProps) {
     //         }
     //     })
     // })
+    // {/*<p>*/}
+    // {/*    {values.map(value => (*/}
+    // {/*        <div >*/}
+    // {/*            [{value.join(", ")}],*/}
+    // {/*        </div>*/}
+    // {/*    ))}*/}
+    // {/*</p>*/}
+
 
     return (
         <div>
-                <table className={classes.table}>
+        <Grid container
+              direction={"column"}
+              justify={"space-around"}
+              alignItems={"center"}>
+            <table className={classes.table}>
                 <tbody>
                 {sudoku.rowIndexes.map(row => {
                     return (
@@ -124,20 +137,29 @@ export function SudokuEditor(props:SudokuEditorProps) {
                 })}
                 </tbody>
             </table>
-            <SudokuOptionsEditor options={options} onOption={onOption}/>
-            <p>
-                <SudokuSolver sudokuHelper={helper} onChange={onChange}/>
-                &nbsp;
-                <SudokuEraser onErase={onErase}/>
-            </p>
 
-            {/*<p>*/}
-            {/*    {values.map(value => (*/}
-            {/*        <div >*/}
-            {/*            [{value.join(", ")}],*/}
-            {/*        </div>*/}
-            {/*    ))}*/}
-            {/*</p>*/}
+            </Grid>
+
+            <Grid
+                container
+                direction="row"
+                justify="space-between"
+                alignItems="flex-start"
+            >
+
+            <SudokuOptionsEditor options={options} onOption={onOption}/>
+
+            <div style={{textAlign: "right"}}>
+                <Box mt={1}>
+                    <SudokuSolver sudokuHelper={helper} onChange={onChange}/>
+                </Box>
+
+                <Box mt={1} mb={2}>
+                    <SudokuEraser onErase={onErase}/>
+                </Box>
+            </div>
+
+            </Grid>
 
         </div>
     );

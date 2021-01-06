@@ -1,14 +1,23 @@
 import React from 'react';
 
-import { Container } from "@material-ui/core"
+import { Box, Grid } from "@material-ui/core"
 
 import SudokuApp from "./components/SudokuApp"
+import SudokuAppBar from "./components/SudokuAppBar"
 
 function App() {
     return (
-    <Container>
-        <SudokuApp/>
-    </Container>
+        <div>
+            <Box mb={2}>
+                <SudokuAppBar/>
+            </Box>
+            <Grid container
+                  direction={"column"}
+                  alignItems={"center"}
+                  justify={"center"}>
+                <SudokuApp/>
+            </Grid>
+        </div>
     );
 }
 
