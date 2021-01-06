@@ -13,7 +13,7 @@ const useStyles = makeStyles((theme: Theme) =>
             left: 0,
             textAlign: "left",
             marginLeft: "2px",
-            fontSize: "8px",
+            fontSize: "10px",
             fontFamily: "monospace"
         }
     }),
@@ -44,7 +44,7 @@ function SudokuPossibilities(props: SudokuPossibilitiesProps) {
 
     return (
         <div className={classes.possibleValues}>
-            {lines.map(line => <div>
+            {lines.map((line, i) => <div key={i}>
                 {line.replace(/ /g, "\u00a0")}
             </div>)}
         </div>
