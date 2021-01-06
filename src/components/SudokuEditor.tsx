@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { makeStyles } from '@material-ui/core/styles';
-import { Sudoku } from "../types/Sudoku"
+import { Sudoku, SudokuIndex } from "../types/Sudoku"
 import SudokuCellEditor from "./SudokuCellEditor"
 import SudokuHint from "./SudokuHint"
 import { SudokuHelper } from "../types/SudokuHelper"
@@ -58,19 +58,18 @@ export function SudokuEditor(props:SudokuEditorProps) {
     });
     const classes = useStyles();
 
-    const getKey = (row: number, col: number, value: SudokuValue) => {
-        return `${row}.${col}.${value}`
+    const getKey = (index: SudokuIndex, value: SudokuValue) => {
+        return `${index.row}.${index.col}.${value}`
     }
 
-    const onChange = (row: number, col: number, value: SudokuValue) => {
-        const index = {row, col}
+    const onChange = (index: SudokuIndex, value: SudokuValue) => {
         if (sudoku.isValidValue(index, value)) {
             sudoku.setValue(index, value)
         } else {
             sudoku.setValue(index, null)
         }
         value = sudoku.getValue(index)
-        setChange(getKey(row, col, value))
+        setChange(getKey(index, value))
         helper.analyze()
         return value
     }
@@ -105,8 +104,9 @@ export function SudokuEditor(props:SudokuEditorProps) {
                     return (
                         <tr key={row}>
                             {sudoku.colIndexes.map(col => {
-                                const key = getKey(row, col, sudoku.getValue({row, col}))
-                                const style = getStyle(sudoku, row, col)
+                                const index = {row, col}
+                                const key = getKey(index, sudoku.getValue(index))
+                                const style = getStyle(sudoku, index)
                                 if (key === change) {
                                     style.backgroundColor = "LightBlue"
                                 }
@@ -115,15 +115,15 @@ export function SudokuEditor(props:SudokuEditorProps) {
                                         <SudokuPossibilities sudoku={sudoku}
                                                              sudokuHelper={helper}
                                                              options={options}
-                                                             row={row} col={col}/>
+                                                             index={index}/>
                                         <SudokuHint sudoku={sudoku}
                                                     sudokuHelper={helper}
                                                     options={options}
-                                                    row={row} col={col}
+                                                    index={index}
                                                     onChange={onChange}/>
                                         <SudokuCellEditor sudoku={sudoku}
                                                           sudokuOptions={options}
-                                                          row={row} col={col}
+                                                          index={index}
                                                           onChange={onChange}/>
                                     </td>
                                 )
@@ -139,6 +139,7 @@ export function SudokuEditor(props:SudokuEditorProps) {
                 &nbsp;
                 <SudokuEraser onErase={onErase}/>
             </p>
+
             {/*<p>*/}
             {/*    {values.map(value => (*/}
             {/*        <div >*/}
@@ -146,6 +147,7 @@ export function SudokuEditor(props:SudokuEditorProps) {
             {/*        </div>*/}
             {/*    ))}*/}
             {/*</p>*/}
+
         </div>
     );
 }

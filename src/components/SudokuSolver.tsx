@@ -3,10 +3,11 @@ import { Button } from "@material-ui/core"
 import BuildIcon from '@material-ui/icons/Build'
 import { SudokuHelper } from "../types/SudokuHelper"
 import { SudokuValue } from "../types/SudokuCell"
+import { SudokuIndex } from "../types/Sudoku"
 
 export interface SudokuSolverProps {
     sudokuHelper: SudokuHelper,
-    onChange: (row: number, col: number, value: SudokuValue) => SudokuValue
+    onChange: (index: SudokuIndex, value: SudokuValue) => SudokuValue
 }
 
 function SudokuSolver(props: SudokuSolverProps) {
@@ -15,8 +16,8 @@ function SudokuSolver(props: SudokuSolverProps) {
     const solve = () => {
         const hint = sudokuHelper.getHint()
         if (hint) {
-            const [{row, col}, value] = hint
-            onChange(row, col, value)
+            const [index, value] = hint
+            onChange(index, value)
             setTimeout(() => solve(), 0)
         }
     }

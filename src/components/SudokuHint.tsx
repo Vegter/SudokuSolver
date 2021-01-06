@@ -1,5 +1,5 @@
 import React from 'react'
-import { Sudoku } from "../types/Sudoku"
+import { Sudoku, SudokuIndex } from "../types/Sudoku"
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles"
 import { SudokuHelper } from "../types/SudokuHelper"
 import { SudokuValue } from "../types/SudokuCell"
@@ -23,15 +23,13 @@ export interface SudokuHintProps {
     sudoku: Sudoku,
     sudokuHelper: SudokuHelper,
     options: SudokuOptions,
-    row: number,
-    col: number,
-    onChange: (row: number, col: number, value: SudokuValue) => SudokuValue
+    index: SudokuIndex
+    onChange: (index: SudokuIndex, value: SudokuValue) => SudokuValue
 }
 
 function SudokuHint(props: SudokuHintProps) {
     const classes = useStyles();
-    const { sudoku, sudokuHelper, options, row, col } = props
-    const index = {row, col}
+    const { sudoku, sudokuHelper, options, index } = props
     const value = sudoku.getValue(index)
 
     const mandatoryValue = sudokuHelper.mandatoryValue(index)
@@ -42,7 +40,7 @@ function SudokuHint(props: SudokuHintProps) {
     }
 
     const onProposalClick = (proposal:number) => {
-        props.onChange(row, col, proposal)
+        props.onChange(index, proposal)
     }
 
     return (

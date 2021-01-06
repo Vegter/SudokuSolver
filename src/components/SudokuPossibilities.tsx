@@ -1,5 +1,5 @@
 import React from 'react'
-import { Sudoku } from "../types/Sudoku"
+import { Sudoku, SudokuIndex } from "../types/Sudoku"
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles"
 import { SudokuHelper } from "../types/SudokuHelper"
 import { SudokuCell } from "../types/SudokuCell"
@@ -23,14 +23,12 @@ export interface SudokuPossibilitiesProps {
     sudoku: Sudoku,
     sudokuHelper: SudokuHelper,
     options: SudokuOptions,
-    row: number,
-    col: number,
+    index: SudokuIndex
 }
 
 function SudokuPossibilities(props: SudokuPossibilitiesProps) {
     const classes = useStyles();
-    const { sudoku, sudokuHelper, options, row, col } = props
-    const index = {row, col}
+    const { sudoku, sudokuHelper, options, index } = props
     const value = sudoku.getValue(index)
 
     if (value !== null || !options.showPossibleValues) {
