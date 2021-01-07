@@ -1,9 +1,12 @@
 import { Sudoku, SudokuIndex } from "./Sudoku"
 import { SudokuValue } from "./SudokuCell"
+import { SudokuAreaConstraint } from "./SudokuConstraint"
 
 type IndexInfo = {
     allowedValues: SudokuValue[]
     mandatoryValue: SudokuValue
+    allowedValuesCopies: SudokuIndex[]
+    singleRowColumnValues: SudokuValue[]
 }
 
 export class SudokuHelper {
@@ -19,7 +22,9 @@ export class SudokuHelper {
             this._sudoku.colIndexes.forEach(col => {
                 this._info[row][col] = {
                     allowedValues: [],
-                    mandatoryValue: null
+                    mandatoryValue: null,
+                    allowedValuesCopies: [],
+                    singleRowColumnValues: []
                 }
             })
         })
@@ -51,11 +56,19 @@ export class SudokuHelper {
             }
         }
 
+        const emptyIndexes = this._sudoku.indexes
+            .filter(index => this._sudoku.getValue(index) === null)
+
+        // Find any identical allowed values (pairs)
+        for (let index of emptyIndexes) {
+            const {row, col} = index
+            this._info[row][col].allowedValuesCopies = this.getIdenticalAllowedValues(index)
+        }
+
         // Find any single column/row values
-        for (let index of this._sudoku.indexes) {
-            if (this._sudoku.getValue(index) === null) {
-                this.isSingleRowColumnValue(index)
-            }
+        for (let index of emptyIndexes) {
+            const {row, col} = index
+            this._info[row][col].singleRowColumnValues = this.getSingleRowColumnValues(index)
         }
     }
 
@@ -82,25 +95,47 @@ export class SudokuHelper {
         }
     }
 
-    private isSingleRowColumnValue(index: SudokuIndex) {
+    private getIdenticalAllowedValues(index: SudokuIndex): SudokuIndex[] {
+        const allowedValues = this.allowedValues(index)
+
+        const constraints = this._sudoku.constraints
+            .filter(c => c.appliesTo(index))
+
+        const result = new Set<SudokuIndex>()
+        for (let constraint of constraints) {
+            const identicalIndexes = constraint.constraintIndexes(this._sudoku)
+                .filter(i => allowedValues.join('') === this.allowedValues(i).join(''))
+            if (identicalIndexes.length > 1 && identicalIndexes.length === allowedValues.length) {
+                identicalIndexes.forEach(i => result.add(i))
+            }
+        }
+        return Array.from(result)
+    }
+
+    private getSingleRowColumnValues(index: SudokuIndex): SudokuValue[] {
         const info = this.getInfo(index)
-        const constraints = this._sudoku.constraints.filter(c => c.appliesTo(index))
+        const constraints = this._sudoku.constraints
+            .filter(c => c.appliesTo(index))
+            .filter(constraint => constraint instanceof SudokuAreaConstraint)
+
+        const result: SudokuValue[] = []
         for (let value of info.allowedValues) {
             // Try finding a value with all possible values on one row or one column
-            let rows = new Set()
-            let cols = new Set()
             for (let constraint of constraints) {
+                let rows = new Set()
+                let cols = new Set()
                 for (let constraintIndex of constraint.constraintIndexes(this._sudoku)) {
                     if (this.getInfo(constraintIndex).allowedValues.includes(value)) {
                         rows.add(constraintIndex.row)
                         cols.add(constraintIndex.col)
                     }
                 }
-            }
-            if (rows.size === 2 || cols.size === 2) {
-                console.log("Single row/column", index, value, rows, cols)
+                if (rows.size === 1 || cols.size === 1) {
+                    result.push(value)
+                }
             }
         }
+        return result
     }
 
     public getHint(): [SudokuIndex, SudokuValue] | undefined {
@@ -120,5 +155,15 @@ export class SudokuHelper {
     public mandatoryValue(index: SudokuIndex) {
         const {row, col} = index
         return this._info[row][col].mandatoryValue
+    }
+
+    public allowedValuesCopies(index: SudokuIndex) {
+        const {row, col} = index
+        return this._info[row][col].allowedValuesCopies
+    }
+
+    public singleRowColumnValues(index: SudokuIndex) {
+        const {row, col} = index
+        return this._info[row][col].singleRowColumnValues
     }
 }

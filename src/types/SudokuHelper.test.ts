@@ -32,6 +32,8 @@ test("create helper", () => {
     let index = {row: 4, col: 5}
     expect(h.allowedValues(index)).toEqual([3, 4, 5, 6, 8, 9])
     expect(h.mandatoryValue(index)).toEqual(6)
+    expect(h.allowedValuesCopies(index)).toEqual([])
+    expect(h.singleRowColumnValues(index)).toEqual([6])
 })
 
 test("get hint", () => {
