@@ -1,4 +1,4 @@
-import { range } from "./utils"
+import { getAllSubsets, range } from "./utils"
 import { AssertionError } from "assert"
 
 test('create ranges', () => {
@@ -30,3 +30,13 @@ test('create ranges', () => {
         r = range(-1)
     }).toThrow(AssertionError)
 });
+
+test("find subsets", () => {
+    expect(getAllSubsets([1, 2, 3]).length).toEqual(8)
+    expect(getAllSubsets([1, 2, 3])).toEqual([
+        [],       [ 1 ],
+        [ 2 ],    [ 2, 1 ],
+        [ 3 ],    [ 3, 1 ],
+        [ 3, 2 ], [ 3, 2, 1 ]
+    ])
+})

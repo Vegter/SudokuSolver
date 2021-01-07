@@ -1,11 +1,14 @@
 import { Sudoku, SudokuIndex } from "./Sudoku"
 import { SudokuValue } from "./SudokuCell"
 import { SudokuAreaConstraint } from "./SudokuConstraint"
+import { getAllSubsets } from "../utils"
+import { SudokuOptions } from "../config"
 
 type IndexInfo = {
     allowedValues: SudokuValue[]
     mandatoryValue: SudokuValue
-    allowedValuesCopies: SudokuIndex[]
+    pairs: SudokuIndex[]
+    hiddenPairs: SudokuIndex[]
     singleRowColumnValues: SudokuValue[]
 }
 
@@ -23,7 +26,8 @@ export class SudokuHelper {
                 this._info[row][col] = {
                     allowedValues: [],
                     mandatoryValue: null,
-                    allowedValuesCopies: [],
+                    pairs: [],
+                    hiddenPairs: [],
                     singleRowColumnValues: []
                 }
             })
@@ -52,7 +56,7 @@ export class SudokuHelper {
             if (this.allowedValues(index).length === 1) {
                 this._info[row][col].mandatoryValue = this.allowedValues(index)[0]
             } else {
-                this.setMandatoryValue(index)
+                this._info[row][col].mandatoryValue = this.getMandatoryValue(index)
             }
         }
 
@@ -62,7 +66,8 @@ export class SudokuHelper {
         // Find any identical allowed values (pairs)
         for (let index of emptyIndexes) {
             const {row, col} = index
-            this._info[row][col].allowedValuesCopies = this.getIdenticalAllowedValues(index)
+            this._info[row][col].pairs = this.getPairs(index)
+            this._info[row][col].hiddenPairs = this.getHiddenPairs(index)
         }
 
         // Find any single column/row values
@@ -72,9 +77,10 @@ export class SudokuHelper {
         }
     }
 
-    private setMandatoryValue(index: SudokuIndex) {
+    private getMandatoryValue(index: SudokuIndex): SudokuValue {
         const info = this.getInfo(index)
         const constraints = this._sudoku.constraints.filter(c => c.appliesTo(index))
+
         for (let value of info.allowedValues) {
             // Try finding a value with only one possible index within a constraint
             for (let constraint of constraints) {
@@ -84,32 +90,101 @@ export class SudokuHelper {
                         nPossibilities += 1
                     }
                     if (nPossibilities > 1) {
+                        // Stop searching this constraint as it allows for multiple indexes for the given value
                         break;
                     }
                 }
                 if (nPossibilities === 1) {
-                    info.mandatoryValue = value
-                    return
+                    // The given value is mandatory for this index
+                    return value
                 }
             }
         }
+        return null
     }
 
-    private getIdenticalAllowedValues(index: SudokuIndex): SudokuIndex[] {
+    private getPairs(index: SudokuIndex): SudokuIndex[] {
         const allowedValues = this.allowedValues(index)
 
+        // Pairs within a constraint with identical allowed values is not possible
+        if (allowedValues.length === 1) {
+            return []
+        }
+
+        // Find any applicable constraints
         const constraints = this._sudoku.constraints
             .filter(c => c.appliesTo(index))
 
-        const result = new Set<SudokuIndex>()
+        const result: SudokuIndex[] = []
         for (let constraint of constraints) {
             const identicalIndexes = constraint.constraintIndexes(this._sudoku)
                 .filter(i => allowedValues.join('') === this.allowedValues(i).join(''))
-            if (identicalIndexes.length > 1 && identicalIndexes.length === allowedValues.length) {
-                identicalIndexes.forEach(i => result.add(i))
+            // A pair is a set of indexes with identical values, eg [[x, y] [x, y]] or [[x, y, z] [x, y, z]]
+            if (identicalIndexes.length === allowedValues.length) {
+                identicalIndexes.forEach(i => {
+                    if (! result.find(index => index.row === i.row && index.col === i.col)) {
+                        result.push(i)
+                    }
+                })
             }
         }
-        return Array.from(result)
+        return result
+    }
+
+    private getHiddenPairs(index: SudokuIndex): SudokuIndex[] {
+        const allowedValues = this.allowedValues(index)
+
+        // Pairs within a constraint with identical allowed values is not possible
+        if (allowedValues.length === 1) {
+            return []
+        }
+
+        // Search for subsets of a minimum length of 2 and less than the length of the allowed values
+        // Length 1 cannot result in a usable set, length allowed values is a naked pair (and not hidden)
+        const subsets = getAllSubsets(allowedValues)
+            .filter((set: number[]) => 2 <= set.length && set.length < allowedValues.length)
+
+        // Find any applicable constraints
+        const constraints = this._sudoku.constraints
+            .filter(c => c.appliesTo(index))
+
+        const result: SudokuIndex[] = []
+        for (let subset of subsets) {
+            // Check every subset
+            for (let constraint of constraints) {
+                // Find all indexes that contain this subset
+                const identicalIndexes = constraint.constraintIndexes(this._sudoku)
+                    .filter(i => {
+                        for (let n of subset) {
+                            if (!this.allowedValues(i).includes(n)) return false
+                        }
+                        return true
+                    })
+                if (identicalIndexes.length !== subset.length) {
+                    continue
+                }
+
+                // Find all indexes that don't contain any of the subset
+                const inIndexes = constraint.constraintIndexes(this._sudoku)
+                    .filter(i => {
+                        for (let n of subset) {
+                            if (this.allowedValues(i).includes(n)) return true
+                        }
+                        return false
+                    })
+                if (identicalIndexes.length !== inIndexes.length) {
+                    continue
+                }
+
+                // a subset of length n appears at only n indexes and none of the subset is in any other index
+                identicalIndexes.forEach(i => {
+                    if (! result.find(index => index.row === i.row && index.col === i.col)) {
+                        result.push(i)
+                    }
+                })
+            }
+        }
+        return result
     }
 
     private getSingleRowColumnValues(index: SudokuIndex): SudokuValue[] {
@@ -147,6 +222,52 @@ export class SudokuHelper {
         }
     }
 
+    public fillAllowedValues() {
+        for (let index of this._sudoku.indexes) {
+            const value = this._sudoku.getValue(index)
+            if (value === null) {
+                this.getInfo(index).allowedValues = this._sudoku.allowedValues(index)
+            } else {
+                this.getInfo(index).allowedValues = [value]
+            }
+        }
+    }
+
+    public fillMandatoryValues() {
+        for (let index of this._sudoku.indexes) {
+            const value = this._sudoku.getValue(index)
+            const info = this.getInfo(index)
+            if (value !== null) {
+                // Value is already known, do not calculate any mandatory value
+                this.getInfo(index).mandatoryValue = null
+            } else if (this.allowedValues(index).length === 1) {
+                // Only one value is possible for the index
+                this.getInfo(index).mandatoryValue = this.allowedValues(index)[0]
+            } else {
+                // Check is any of the values is unique within a constraint
+                this.getInfo(index).mandatoryValue = this.getMandatoryValue(index)
+            }
+        }
+    }
+
+    public fillPairs() {
+        for (let index of this._sudoku.indexes) {
+            const value = this._sudoku.getValue(index)
+            const info = this.getInfo(index)
+            // Find any indexes with identical allowed values
+            info.pairs = this.getPairs(index)
+        }
+    }
+
+    public fillHiddenPairs() {
+        for (let index of this._sudoku.indexes) {
+            const value = this._sudoku.getValue(index)
+            const info = this.getInfo(index)
+            // Find any indexes with hidden identical allowed values
+            info.pairs = this.getHiddenPairs(index)
+        }
+    }
+
     public allowedValues(index: SudokuIndex) {
         const {row, col} = index
         return this._info[row][col].allowedValues
@@ -157,9 +278,14 @@ export class SudokuHelper {
         return this._info[row][col].mandatoryValue
     }
 
-    public allowedValuesCopies(index: SudokuIndex) {
+    public pairs(index: SudokuIndex) {
         const {row, col} = index
-        return this._info[row][col].allowedValuesCopies
+        return this._info[row][col].pairs
+    }
+
+    public hiddenPairs(index: SudokuIndex) {
+        const {row, col} = index
+        return this._info[row][col].hiddenPairs
     }
 
     public singleRowColumnValues(index: SudokuIndex) {

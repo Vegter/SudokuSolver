@@ -16,7 +16,7 @@ export class Sudoku {
 
     public readonly rowIndexes: number[]
     public readonly colIndexes: number[]
-    public indexes: SudokuIndex[]
+    public readonly indexes: SudokuIndex[]
 
     constructor(nRows: number, nCols: number, constraints: SudokuConstraint[]) {
         assert(nRows > 0 && nCols > 0)
