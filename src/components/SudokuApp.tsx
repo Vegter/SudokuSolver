@@ -8,15 +8,53 @@ import { SudokuFactory } from "../types/SudokuFactory"
 import SudokuEditor from "./SudokuEditor"
 import SudokuVariantSelector from "./SudokuVariantSelector"
 import { Grid, Paper } from "@material-ui/core"
+import { Sudoku } from "../types/Sudoku"
+import SudokuIdSelector from "./SudokuIdSelector"
+
+const initialState = {
+    variant: Default.sudokuVariant,
+    ids: [] as string[],
+    id: "",
+    sudoku: null as Sudoku | null
+}
 
 export default function SudokuApp() {
-    const [variant, setVariant] = useState(Default.sudokuVariant)
-    const [sudoku, setSudoku] = useState(SudokuFactory.create(variant, true))
+    const [state, setState] = useState(initialState)
+    const {variant, ids, id, sudoku} = state
 
-    const onVariant = (variant: SudokuVariant) => {
-        const sudoku = SudokuFactory.create(variant, true)
-        setVariant(variant)
-        setSudoku(sudoku)
+    async function loadVariant(variant: SudokuVariant) {
+        const sudoku = SudokuFactory.create(variant)
+        const ids = await SudokuFactory.dataIds(variant)
+        const id = ids[0]
+        await variant.fill(sudoku, id)
+
+        setState({
+            ...state,
+            variant,
+            ids,
+            id,
+            sudoku
+        })
+    }
+
+    if (!sudoku) {
+        loadVariant(variant)
+        return (
+            <p>Loading...</p>
+        )
+    }
+
+    async function loadId(sudoku: Sudoku, id: string) {
+        await variant.fill(sudoku, id)
+    }
+
+    const onVariant = async (variant: SudokuVariant) => {
+        await loadVariant(variant)
+    }
+
+    const onId = async (id: string) => {
+        await loadId(sudoku, id)
+        setState({...state, id})
     }
 
     return (
@@ -25,7 +63,13 @@ export default function SudokuApp() {
                   direction={"column"}
                   justify={"space-around"}
                   alignItems={"center"}>
-                <SudokuVariantSelector variant={variant} onVariant={onVariant}/>
+                <Grid container
+                      direction={"row"}
+                      justify={"space-around"}
+                      alignItems={"center"}>
+                    <SudokuVariantSelector variant={variant} onVariant={onVariant}/>
+                    <SudokuIdSelector ids={ids} id={id} onId={onId}/>
+                </Grid>
                 <SudokuEditor sudoku={sudoku}/>
             </Grid>
         </Paper>

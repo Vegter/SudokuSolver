@@ -23,6 +23,9 @@ const useStyles = makeStyles((theme: Theme) =>
         },
         pairValues: {
             color: "red",
+        },
+        hiddenPairValues: {
+            color: "blue"
         }
     }),
 );
@@ -39,22 +42,25 @@ function SudokuPossibilities(props: SudokuPossibilitiesProps) {
     const { sudoku, sudokuHelper, options, index } = props
     const value = sudoku.getValue(index)
 
-    const {showPossibleValues, showPairs, showSingleRowColumnValues} = options
+    const {showPossibleValues, showPairs, showSingleRowColumnValues, showHiddenPairs} = options
 
-    if (value !== null || !(showPossibleValues || showPairs || showSingleRowColumnValues)) {
+    if (value !== null || !(showPossibleValues || showPairs || showSingleRowColumnValues || showHiddenPairs)) {
         // Nothing for existing values or when filtered out by options
         return null
     }
 
     const possibleValues = sudokuHelper.allowedValues(index)
     const singleRowColumnValues = sudokuHelper.singleRowColumnValues(index)
-    const isPair = sudokuHelper.allowedValuesCopies(index).length > 0
+    const isPair = sudokuHelper.pairs(index).length > 0
+    const isHiddenPair = sudokuHelper.hiddenPairs(index).length > 0
 
     let values: SudokuValue[] = []
     if (showPossibleValues) {
         values = possibleValues
     } else {
         if (showPairs && isPair) {
+            values = possibleValues
+        } else if (showHiddenPairs && isHiddenPair) {
             values = possibleValues
         } else if (showSingleRowColumnValues) {
             values = singleRowColumnValues
@@ -81,6 +87,9 @@ function SudokuPossibilities(props: SudokuPossibilitiesProps) {
                         let className = classes.possibleValue
                         if (showPairs && isPair) {
                             className = classes.pairValues
+                        }
+                        if (showHiddenPairs && isHiddenPair) {
+                            className = classes.hiddenPairValues
                         }
                         if (showSingleRowColumnValues && singleRowColumnValues.includes(c)) {
                             className = classes.singleRowColumnValue

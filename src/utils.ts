@@ -8,3 +8,11 @@ export function range(from: number, to: number | null = null): number[] {
     assert(to >= from)
     return Array.from(Array(to - from).keys()).map(v => from + v)
 }
+
+export const getAllSubsets =
+    (theArray: any[]) => theArray.reduce(
+        (subsets, value) => subsets.concat(
+            subsets.map((set: any) => [value,...set])
+        ),
+        [[]]
+    );

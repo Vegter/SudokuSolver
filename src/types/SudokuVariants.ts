@@ -5,26 +5,23 @@ export interface SudokuVariant {
     id: string
     name: string
     create: () => Sudoku
-    fill: (sudoku: Sudoku) => void
+    fill: (sudoku: Sudoku, id?: string) => Promise<void>
+    dataURL: string
 }
 
 export const SudokuVariants = {
     Basic: {
         id: "Basic",
-        name: "Basic Sudoku",
+        name: "Standard Sudoku",
         create: SudokuFactory.createBasicSudoku,
-        fill: SudokuFactory.fillBasicSudoku
-    },
-    Complex: {
-        id: "Complex",
-        name: "Complex Sudoku",
-        create: SudokuFactory.createBasicSudoku,
-        fill: SudokuFactory.fillComplexSudoku
+        fill: SudokuFactory.fillBasicSudoku,
+        dataURL: "/data/basic.json"
     },
     NRC: {
         id: "NRC",
         name: "NRC Sudoku",
         create: SudokuFactory.createNRCSudoku,
-        fill: SudokuFactory.fillNRCSudoku
+        fill: SudokuFactory.fillNRCSudoku,
+        dataURL: "/data/nrc.json"
     }
 }
