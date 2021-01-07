@@ -10,6 +10,10 @@ test("sudoku factory", () => {
 
     s = SudokuFactory.create(SudokuVariants.Basic, true)
     expect(s.constraints.length).toEqual(9 + 9 + 9)
+    expect(s.indexes.map(index => s.getValue(index)).filter(v => v).length).toEqual(27)
+
+    s = SudokuFactory.create(SudokuVariants.Complex, true)
+    expect(s.constraints.length).toEqual(9 + 9 + 9)
     expect(s.indexes.map(index => s.getValue(index)).filter(v => v).length).toEqual(23)
 
     s = SudokuFactory.create(SudokuVariants.Basic, false)
