@@ -69,6 +69,39 @@ export class SudokuFactory {
 
     public static fillBasicSudoku(sudoku: Sudoku) {
         [
+            [0, 2, 3],
+            [0, 4, 1],
+            [0, 6, 5],
+            [1, 5, 9],
+            [1, 7, 7],
+            [1, 8, 6],
+            [2, 0, 6],
+            [2, 3, 7],
+            [2, 5, 5],
+            [2, 8, 1],
+            [3, 4, 4],
+            [3, 6, 8],
+            [4, 1, 7],
+            [4, 6, 4],
+            [4, 8, 2],
+            [5, 0, 9],
+            [5, 1, 1],
+            [5, 7, 6],
+            [6, 2, 9],
+            [6, 5, 8],
+            [6, 6, 1],
+            [6, 8, 4],
+            [7, 6, 6],
+            [8, 0, 5],
+            [8, 4, 2],
+            [8, 7, 9],
+            [8, 8, 7],
+        ].forEach(([row, col, value]) =>
+            sudoku.setValue({row, col}, value));
+    }
+
+    public static fillComplexSudoku(sudoku: Sudoku) {
+        [
             [0, 0, 4],
             [0, 4, 6],
             [0, 7, 7],
@@ -95,6 +128,4 @@ export class SudokuFactory {
         ].forEach(([row, col, value]) =>
             sudoku.setValue({row, col}, value));
     }
-
-
 }

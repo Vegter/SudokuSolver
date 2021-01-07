@@ -15,6 +15,12 @@ export const SudokuVariants = {
         create: SudokuFactory.createBasicSudoku,
         fill: SudokuFactory.fillBasicSudoku
     },
+    Complex: {
+        id: "Complex",
+        name: "Complex Sudoku",
+        create: SudokuFactory.createBasicSudoku,
+        fill: SudokuFactory.fillComplexSudoku
+    },
     NRC: {
         id: "NRC",
         name: "NRC Sudoku",
