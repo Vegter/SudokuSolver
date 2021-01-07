@@ -21,7 +21,9 @@ export default function SudokuOptionsEditor(props: SudokuOptionsEditorProps) {
 
     const switches = {
         showPossibleValues: "Show possible values",
-        showHint: "Show hint"
+        showHint: "Show hint",
+        showPairs: "Show pairs",
+        showSingleRowColumnValues: "Show single row/columns"
     }
 
     return (

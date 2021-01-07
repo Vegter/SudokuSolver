@@ -87,10 +87,6 @@ export class Sudoku {
     }
 
     public blockedValues(index: SudokuIndex): SudokuValue[] {
-        // const value = this.getValue(index)
-        // if (value !== null) {
-        //     return SudokuCell.ValidValues.filter(v => v !== value)
-        // }
         const blockedValues = new Set<SudokuValue>()
         for (let constraint of this._constraints) {
             constraint.blockedValues(this, index).forEach(v => blockedValues.add(v))
@@ -99,10 +95,6 @@ export class Sudoku {
     }
 
     public allowedValues(index: SudokuIndex): SudokuValue[] {
-        // const value = this.getValue(index)
-        // if (value !== null) {
-        //     return [value]
-        // }
         const blockedValues = this.blockedValues(index)
         return SudokuCell.ValidValues.filter(v => !blockedValues.includes(v))
     }
