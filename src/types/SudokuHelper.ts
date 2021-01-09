@@ -2,13 +2,12 @@ import { Sudoku, SudokuIndex } from "./Sudoku"
 import { SudokuValue } from "./SudokuCell"
 import { SudokuAreaConstraint } from "./SudokuConstraint"
 import { getAllSubsets } from "../utils"
-import { SudokuOptions } from "../config"
 
 type IndexInfo = {
     allowedValues: SudokuValue[]
     mandatoryValue: SudokuValue
     pairs: SudokuIndex[]
-    hiddenPairs: SudokuIndex[]
+    hiddenPairs: SudokuValue[]
     singleRowColumnValues: SudokuValue[]
 }
 
@@ -131,7 +130,7 @@ export class SudokuHelper {
         return result
     }
 
-    private getHiddenPairs(index: SudokuIndex): SudokuIndex[] {
+    private getHiddenPairs(index: SudokuIndex): SudokuValue[] {
         const allowedValues = this.allowedValues(index)
 
         // Pairs within a constraint with identical allowed values is not possible
@@ -143,12 +142,13 @@ export class SudokuHelper {
         // Length 1 cannot result in a usable set, length allowed values is a naked pair (and not hidden)
         const subsets = getAllSubsets(allowedValues)
             .filter((set: number[]) => 2 <= set.length && set.length < allowedValues.length)
+        subsets.sort((el1: number[], el2: number[]) => el2.length - el1.length)
 
         // Find any applicable constraints
         const constraints = this._sudoku.constraints
             .filter(c => c.appliesTo(index))
 
-        const result: SudokuIndex[] = []
+        const result = new Set<SudokuValue>()
         for (let subset of subsets) {
             // Check every subset
             for (let constraint of constraints) {
@@ -176,15 +176,10 @@ export class SudokuHelper {
                     continue
                 }
 
-                // a subset of length n appears at only n indexes and none of the subset is in any other index
-                identicalIndexes.forEach(i => {
-                    if (! result.find(index => index.row === i.row && index.col === i.col)) {
-                        result.push(i)
-                    }
-                })
+                subset.forEach((v: number) => result.add(v))
             }
         }
-        return result
+        return Array.from(result)
     }
 
     private getSingleRowColumnValues(index: SudokuIndex): SudokuValue[] {
@@ -236,7 +231,6 @@ export class SudokuHelper {
     public fillMandatoryValues() {
         for (let index of this._sudoku.indexes) {
             const value = this._sudoku.getValue(index)
-            const info = this.getInfo(index)
             if (value !== null) {
                 // Value is already known, do not calculate any mandatory value
                 this.getInfo(index).mandatoryValue = null
@@ -252,7 +246,6 @@ export class SudokuHelper {
 
     public fillPairs() {
         for (let index of this._sudoku.indexes) {
-            const value = this._sudoku.getValue(index)
             const info = this.getInfo(index)
             // Find any indexes with identical allowed values
             info.pairs = this.getPairs(index)
@@ -261,10 +254,9 @@ export class SudokuHelper {
 
     public fillHiddenPairs() {
         for (let index of this._sudoku.indexes) {
-            const value = this._sudoku.getValue(index)
             const info = this.getInfo(index)
             // Find any indexes with hidden identical allowed values
-            info.pairs = this.getHiddenPairs(index)
+            info.hiddenPairs = this.getHiddenPairs(index)
         }
     }
 

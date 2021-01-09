@@ -52,7 +52,8 @@ function SudokuPossibilities(props: SudokuPossibilitiesProps) {
     const possibleValues = sudokuHelper.allowedValues(index)
     const singleRowColumnValues = sudokuHelper.singleRowColumnValues(index)
     const isPair = sudokuHelper.pairs(index).length > 0
-    const isHiddenPair = sudokuHelper.hiddenPairs(index).length > 0
+    const hiddenPairs = sudokuHelper.hiddenPairs(index)
+    const isHiddenPair = hiddenPairs.length > 0
 
     let values: SudokuValue[] = []
     if (showPossibleValues) {
@@ -61,7 +62,10 @@ function SudokuPossibilities(props: SudokuPossibilitiesProps) {
         if (showPairs && isPair) {
             values = possibleValues
         } else if (showHiddenPairs && isHiddenPair) {
-            values = possibleValues
+            values = hiddenPairs
+            // hiddenPairs.forEach(pair => {
+            //     pair.forEach((v: number) => values.push(v))
+            // }
         } else if (showSingleRowColumnValues) {
             values = singleRowColumnValues
         }

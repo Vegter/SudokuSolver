@@ -271,12 +271,13 @@ test("pairs", () => {
 
     const hiddenPairIndexes = sudoku.indexes
         .filter(index => helper.hiddenPairs(index).length)
-        .map(index => [index.row, index.col])
+        .map(index => [index.row, index.col, helper.hiddenPairs(index)])
+
     expect(hiddenPairIndexes).toEqual([
-        [ 3, 1 ],
-        [ 5, 1 ],
-        [ 6, 2 ],
-        [ 7, 2 ]
+        [ 3, 1, [7, 4] ],
+        [ 5, 1, [7, 4] ],
+        [ 6, 2, [9, 4] ],
+        [ 7, 2, [9, 4] ]
     ])
 })
 
@@ -329,10 +330,11 @@ test("hidden pairs", () => {
 
     const hiddenPairIndexes = sudoku.indexes
         .filter(index => helper.hiddenPairs(index).length)
-        .map(index => [index.row, index.col])
+        .map(index => [index.row, index.col, helper.hiddenPairs(index)])
+
     // 1 4 is an hidden pair for 6, 5 and 6, 6
     expect(hiddenPairIndexes).toEqual([
-        [ 6, 5 ],
-        [ 6, 6 ]
+        [ 6, 5, [ 4, 1 ] ],
+        [ 6, 6, [ 4, 1 ] ],
     ])
 })
