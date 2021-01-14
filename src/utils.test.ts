@@ -1,4 +1,4 @@
-import { getAllSubsets, range } from "./utils"
+import { getAllSubsets, getHiddenPairs, getPairs, range } from "./utils"
 import { AssertionError } from "assert"
 
 test('create ranges', () => {
@@ -34,9 +34,33 @@ test('create ranges', () => {
 test("find subsets", () => {
     expect(getAllSubsets([1, 2, 3]).length).toEqual(8)
     expect(getAllSubsets([1, 2, 3])).toEqual([
-        [],       [ 1 ],
-        [ 2 ],    [ 2, 1 ],
-        [ 3 ],    [ 3, 1 ],
-        [ 3, 2 ], [ 3, 2, 1 ]
+        [ 1, 2, 3 ],
+        [ 1, 2 ],  [ 1, 3 ], [ 2, 3 ],
+        [ 1 ], [ 2 ], [ 3 ],
+        [],
+    ])
+})
+
+test("find pairs", () => {
+    expect(getPairs([])).toEqual([])
+    expect(getPairs([[1, 2], [3, 4], [1, 2]])).toEqual([[[1, 2], [0, 2]]])
+    expect(getPairs([[1, 2], [3, 4], [1, 2, 3]])).toEqual([])
+    expect(getPairs([[1, 2], [3, 4], [1, 2], [1, 2, 3]])).toEqual([[[1, 2], [0, 2]]])
+    expect(getPairs([[1, 2], [3, 4], [1, 2], [1, 2, 3], [1, 2]])).toEqual([[[1, 2], [0, 2, 4]]])
+})
+
+test("find hidden pairs", () => {
+    expect(getHiddenPairs([])).toEqual([])
+    expect(getHiddenPairs([[1, 2], [3, 4], [1, 2]])).toEqual([[[1, 2], [0, 2]]])
+    expect(getHiddenPairs([[1, 2], [3, 4], [1, 2, 3]])).toEqual([[[1, 2], [0, 2]]])
+    expect(getHiddenPairs([[1, 2], [3, 4], [1, 2], [1, 2, 3, 4, 5]])).toEqual([
+        [[1, 2], [0, 2, 3]],
+        [[3, 4], [1, 3]]
+    ])
+    expect(getHiddenPairs([[1, 3, 5, 7], [3, 4], [2, 3, 4, 5, 6, 7]])).toEqual([
+        [[5, 7], [0, 2]]
+    ])
+    expect(getHiddenPairs([[1, 2, 3, 4], [3, 4], [1, 2, 3], [1, 2, 3, 5]])).toEqual([
+        [[1, 2], [0, 2, 3]]
     ])
 })

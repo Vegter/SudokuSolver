@@ -3,7 +3,7 @@ import FormControl from '@material-ui/core/FormControl';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
-import { SudokuOptions } from "../config"
+import { SudokuOptionKeys, SudokuOptions, strategyMapping } from "../config"
 
 export interface SudokuOptionsEditorProps {
     options: SudokuOptions,
@@ -19,12 +19,10 @@ export default function SudokuOptionsEditor(props: SudokuOptionsEditorProps) {
         props.onOption(name, checked)
     };
 
-    const switches = {
-        showPossibleValues: "Show possible values",
-        showHint: "Show hint",
-        showPairs: "Show pairs",
-        showHiddenPairs: "Show hidden pairs",
-        showSingleRowColumnValues: "Show single row/columns",
+    const switches: Record<SudokuOptionKeys, string> = {
+        PossibleValues: "Show possible values",
+        Hint: "Show hint",
+        ...strategyMapping((strategy, config) => config.option.text)
     }
 
     return (

@@ -1,4 +1,4 @@
-import { Sudoku } from "./Sudoku"
+import { Sudoku, SudokuIndex } from "./Sudoku"
 import { range } from "../utils"
 import { SudokuAreaConstraint, SudokuColumnConstraint, SudokuConstraint, SudokuRowConstraint } from "./SudokuConstraint"
 import { SudokuVariant } from "./SudokuVariants"
@@ -64,7 +64,7 @@ export class SudokuFactory {
 
         // Fill with new data
         for (let [row, col, value] of importDataItems) {
-            sudoku.setValue({row, col}, value);
+            sudoku.setValue(new SudokuIndex(row, col), value);
         }
     }
 

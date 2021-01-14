@@ -3,7 +3,7 @@ import { Sudoku, SudokuIndex } from "../types/Sudoku"
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles"
 import { SudokuHelper } from "../types/SudokuHelper"
 import { SudokuCell, SudokuValue } from "../types/SudokuCell"
-import { SudokuOptions } from "../config"
+import { SudokuOptions, SudokuStrategyKeys, strategyMapping } from "../config"
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -16,17 +16,8 @@ const useStyles = makeStyles((theme: Theme) =>
             fontSize: "10px",
             fontFamily: "monospace"
         },
-        possibleValue: {
-        },
-        singleRowColumnValue: {
-            color: "green"
-        },
-        pairValues: {
-            color: "red",
-        },
-        hiddenPairValues: {
-            color: "blue"
-        }
+        possibleValue: {},
+        ...strategyMapping((strategy, config) => config.style)
     }),
 );
 
@@ -42,33 +33,30 @@ function SudokuPossibilities(props: SudokuPossibilitiesProps) {
     const { sudoku, sudokuHelper, options, index } = props
     const value = sudoku.getValue(index)
 
-    const {showPossibleValues, showPairs, showSingleRowColumnValues, showHiddenPairs} = options
+    // Check is any option is selected
+    const anyOptionSelected = Object.values(options)
+        .reduce((result: boolean, option: boolean) => result || option, false)
 
-    if (value !== null || !(showPossibleValues || showPairs || showSingleRowColumnValues || showHiddenPairs)) {
+    if (value !== null || !anyOptionSelected) {
         // Nothing for existing values or when filtered out by options
         return null
     }
 
-    const possibleValues = sudokuHelper.allowedValues(index)
-    const singleRowColumnValues = sudokuHelper.singleRowColumnValues(index)
-    const isPair = sudokuHelper.pairs(index).length > 0
-    const hiddenPairs = sudokuHelper.hiddenPairs(index)
-    const isHiddenPair = hiddenPairs.length > 0
+    const strategies = sudokuHelper.strategies
+    const strategyValues = strategyMapping((strategy, config) =>
+        strategies[strategy].values(index))
 
     let values: SudokuValue[] = []
-    if (showPossibleValues) {
-        values = possibleValues
+    if (options.PossibleValues) {
+        values = sudokuHelper.allowedValues(index)
     } else {
-        if (showPairs && isPair) {
-            values = possibleValues
-        } else if (showHiddenPairs && isHiddenPair) {
-            values = hiddenPairs
-            // hiddenPairs.forEach(pair => {
-            //     pair.forEach((v: number) => values.push(v))
-            // }
-        } else if (showSingleRowColumnValues) {
-            values = singleRowColumnValues
-        }
+        values = Array.from(
+            Object.entries(strategyValues).reduce((result, [key, values]) => {
+                if (options[key as SudokuStrategyKeys]) {
+                    values.forEach(v => result.add(v))
+                }
+                return result
+            }, new Set<SudokuValue>()))
     }
 
     if (values.length === 0) {
@@ -88,17 +76,14 @@ function SudokuPossibilities(props: SudokuPossibilitiesProps) {
                     if (c === " ") {
                         return <span key={i}>&nbsp;</span>
                     } else {
-                        let className = classes.possibleValue
-                        if (showPairs && isPair) {
-                            className = classes.pairValues
-                        }
-                        if (showHiddenPairs && isHiddenPair) {
-                            className = classes.hiddenPairValues
-                        }
-                        if (showSingleRowColumnValues && singleRowColumnValues.includes(c)) {
-                            className = classes.singleRowColumnValue
-                        }
-                        return <span key={i} className={className}>{c}</span>
+                        let classNames = [classes.possibleValue]
+                        Object.entries(strategyValues).forEach(([key, value]) => {
+                            const strategy = key as SudokuStrategyKeys
+                            if (options[strategy] && strategyValues[strategy].includes(c)) {
+                                classNames.push(classes[strategy])
+                            }
+                        })
+                        return <span key={i} className={classNames.join(' ')}>{c}</span>
                     }
                 })}
             </div>)}

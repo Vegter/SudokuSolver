@@ -33,7 +33,7 @@ function SudokuHint(props: SudokuHintProps) {
 
     const mandatoryValue = sudokuHelper.mandatoryValue(index)
 
-    if (value !== null || !options.showHint || mandatoryValue === null) {
+    if (value !== null || !options.Hint || mandatoryValue === null) {
         // Nothing for existing values
         return null
     }
