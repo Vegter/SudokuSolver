@@ -39,7 +39,7 @@ export abstract class SudokuConstraint {
         let indexes = []
         for (let row of range(this.firstRow, this.lastRow + 1)) {
             for (let col of range(this.firstCol, this.lastCol + 1)) {
-                indexes.push({row, col})
+                indexes.push(new SudokuIndex(row, col))
             }
         }
         return indexes
@@ -79,18 +79,18 @@ export abstract class SudokuConstraint {
 
 export class SudokuRowConstraint extends SudokuConstraint {
     constructor(row: number, colFrom: number = 0, colTo: number = 8) {
-        super({from: {row, col: colFrom}, to: {row, col: colTo}})
+        super({from: new SudokuIndex(row, colFrom), to: new SudokuIndex(row, colTo)})
     }
 }
 
 export class SudokuColumnConstraint extends SudokuConstraint {
     constructor(col: number, rowFrom: number = 0, rowTo: number = 8) {
-        super({from: {row: rowFrom, col}, to: {row: rowTo, col}})
+        super({from: new SudokuIndex(rowFrom, col), to: new SudokuIndex(rowTo, col)})
     }
 }
 
 export class SudokuAreaConstraint extends SudokuConstraint {
     constructor(row: number, col: number, size: number = 3) {
-        super({from: {row, col}, to: {row: row + size - 1, col: col + size - 1}})
+        super({from: new SudokuIndex(row, col), to: new SudokuIndex(row + size - 1, col + size - 1)})
     }
 }

@@ -3,9 +3,16 @@ import { SudokuCell, SudokuValue } from "./SudokuCell"
 import { range } from "../utils"
 import { SudokuConstraint } from "./SudokuConstraint"
 
-export type SudokuIndex = {
-    row: number,
-    col: number
+export class SudokuIndex {
+    public readonly row: number
+    public readonly col: number
+    public readonly id: string
+
+    constructor(row: number, col: number) {
+        this.row = row
+        this.col = col
+        this.id = `${row}.${col}`
+    }
 }
 
 export class Sudoku {
@@ -13,6 +20,7 @@ export class Sudoku {
     private _nCols: number
     private _constraints: SudokuConstraint[]
     private _contents: SudokuCell[][]
+    private _checksum: number
 
     public readonly rowIndexes: number[]
     public readonly colIndexes: number[]
@@ -26,15 +34,18 @@ export class Sudoku {
 
         this.rowIndexes = range(this._nRows)
         this.colIndexes = range(this._nCols)
-        this.indexes = this._indexes
+        this.indexes = []
 
         this._contents = []
         for (let row of this.rowIndexes) {
             this._contents[row] = []
             for (let col of this.colIndexes) {
-                this.setValue({row, col}, null)
+                const index = new SudokuIndex(row, col)
+                this.indexes.push(index)
+                this.setValue(index, null)
             }
         }
+        this._checksum = 0
     }
 
     public clear(): void {
@@ -49,16 +60,6 @@ export class Sudoku {
 
     get nCols(): number {
         return this._nCols
-    }
-
-    private get _indexes(): SudokuIndex[] {
-        const indexes = []
-        for (let row of this.rowIndexes) {
-            for (let col of this.colIndexes) {
-                indexes.push({row, col})
-            }
-        }
-        return indexes
     }
 
     get constraints(): SudokuConstraint[] {
@@ -105,11 +106,16 @@ export class Sudoku {
         assert(this.isValidValue(index, value))
         const {row, col} = index
         this._contents[row][col] = newValue
+        this._checksum += 1
     }
 
     public getValue(index: SudokuIndex): SudokuValue {
         assert(this.isValidIndex(index))
         const {row, col} = index
         return this._contents[row][col].value
+    }
+
+    public get checksum() {
+        return this._checksum
     }
 }

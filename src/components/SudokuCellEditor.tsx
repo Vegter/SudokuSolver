@@ -37,7 +37,7 @@ export default function SudokuCellEditor(props: SudokuCellEditorProps) {
         setValue(value || "")
     }
 
-    if (sudokuOptions.showHint && !value) {
+    if (sudokuOptions.Hint && !value) {
         return null
     }
 

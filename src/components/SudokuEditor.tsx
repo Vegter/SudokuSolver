@@ -25,9 +25,7 @@ export function SudokuEditor(props:SudokuEditorProps) {
     const [options, setOptions] = useState(Default.options)
 
     const { sudoku } = props
-
     const helper = new SudokuHelper(sudoku)
-    helper.analyze()
 
     const useStyles = makeStyles({
         table: {
@@ -51,7 +49,8 @@ export function SudokuEditor(props:SudokuEditorProps) {
     const classes = useStyles();
 
     const getKey = (index: SudokuIndex, value: SudokuValue) => {
-        return `${index.row}.${index.col}.${value}`
+        const allowedValues = helper.allowedValues(index).join('')
+        return `${index.row}.${index.col}.${value}.${allowedValues}`
     }
 
     const onChange = (index: SudokuIndex, value: SudokuValue) => {
@@ -62,7 +61,6 @@ export function SudokuEditor(props:SudokuEditorProps) {
         }
         value = sudoku.getValue(index)
         setChange(getKey(index, value))
-        helper.analyze()
         return value
     }
 
@@ -94,7 +92,7 @@ export function SudokuEditor(props:SudokuEditorProps) {
                     return (
                         <tr key={row}>
                             {sudoku.colIndexes.map(col => {
-                                const index = {row, col}
+                                const index = new SudokuIndex(row, col)
                                 const key = getKey(index, sudoku.getValue(index))
                                 const style = getStyle(sudoku, index)
                                 if (key === change) {
