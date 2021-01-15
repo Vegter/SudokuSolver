@@ -31,9 +31,9 @@ function SudokuHint(props: SudokuHintProps) {
     const { sudoku, sudokuHelper, options, index } = props
     const value = sudoku.getValue(index)
 
-    const mandatoryValue = sudokuHelper.mandatoryValue(index)
+    const onlyOneAllowed = sudokuHelper.onlyOneAllowed(index)
 
-    if (value !== null || !options.Hint || mandatoryValue === null) {
+    if (value !== null || !options.Hint || onlyOneAllowed === null) {
         // Nothing for existing values
         return null
     }
@@ -47,7 +47,7 @@ function SudokuHint(props: SudokuHintProps) {
             className={classes.root}
             size={"small"}
             color={"secondary"}
-            onClick={() => onProposalClick(mandatoryValue)}>
+            onClick={() => onProposalClick(onlyOneAllowed)}>
             ?
         </IconButton>
     )
