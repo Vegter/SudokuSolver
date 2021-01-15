@@ -18,6 +18,10 @@ export class MandatoryValue extends SudokuStrategy {
 
         let mandatoryValue: SudokuValue = null
         let constraints: SudokuConstraint[] = []
+
+        if (info.allowedValues.length === 1) {
+            return [info.allowedValues[0], []]
+        }
         for (let value of info.allowedValues) {
             // Try finding a value with only one possible index within a constraint
             for (let constraint of applicableConstraints) {

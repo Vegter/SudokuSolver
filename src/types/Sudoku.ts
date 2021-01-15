@@ -16,11 +16,12 @@ export class SudokuIndex {
 }
 
 export class Sudoku {
+    private static _checksum:number = 0
+
     private _nRows: number
     private _nCols: number
     private _constraints: SudokuConstraint[]
     private _contents: SudokuCell[][]
-    private _checksum: number
 
     public readonly rowIndexes: number[]
     public readonly colIndexes: number[]
@@ -45,7 +46,6 @@ export class Sudoku {
                 this.setValue(index, null)
             }
         }
-        this._checksum = 0
     }
 
     public clear(): void {
@@ -106,7 +106,7 @@ export class Sudoku {
         assert(this.isValidValue(index, value))
         const {row, col} = index
         this._contents[row][col] = newValue
-        this._checksum += 1
+        Sudoku._checksum += 1
     }
 
     public getValue(index: SudokuIndex): SudokuValue {
@@ -116,6 +116,6 @@ export class Sudoku {
     }
 
     public get checksum() {
-        return this._checksum
+        return Sudoku._checksum
     }
 }

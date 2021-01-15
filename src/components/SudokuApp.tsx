@@ -10,30 +10,34 @@ import SudokuVariantSelector from "./SudokuVariantSelector"
 import { Grid, Paper } from "@material-ui/core"
 import { Sudoku } from "../types/Sudoku"
 import SudokuIdSelector from "./SudokuIdSelector"
+import { SudokuHelper } from "../types/SudokuHelper"
 
 const initialState = {
     variant: Default.sudokuVariant,
     ids: [] as string[],
     id: "",
-    sudoku: null as Sudoku | null
+    sudoku: null as Sudoku | null,
+    helper: null as SudokuHelper | null
 }
 
 export default function SudokuApp() {
     const [state, setState] = useState(initialState)
-    const {variant, ids, id, sudoku} = state
+    const {variant, ids, id, sudoku, helper} = state
 
     async function loadVariant(variant: SudokuVariant) {
         const sudoku = SudokuFactory.create(variant)
         const ids = await SudokuFactory.dataIds(variant)
         const id = ids[0]
         await variant.fill(sudoku, id)
+        const helper = new SudokuHelper(sudoku)
 
         setState({
             ...state,
             variant,
             ids,
             id,
-            sudoku
+            sudoku,
+            helper
         })
     }
 
@@ -70,7 +74,7 @@ export default function SudokuApp() {
                     <SudokuVariantSelector variant={variant} onVariant={onVariant}/>
                     <SudokuIdSelector ids={ids} id={id} onId={onId}/>
                 </Grid>
-                <SudokuEditor sudoku={sudoku}/>
+                <SudokuEditor sudoku={sudoku} helper={helper!}/>
             </Grid>
         </Paper>
     )
