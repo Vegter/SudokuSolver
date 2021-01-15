@@ -80,7 +80,7 @@ export class SudokuHelper {
         this.sudoku.setValue(index, value)
     }
 
-    public mandatoryValue(index: SudokuIndex): SudokuValue {
+    public onlyOneAllowed(index: SudokuIndex): SudokuValue {
         if (this.indexInfo[index.id]) {
             const allowedValues = this.indexInfo[index.id].allowedValues
             if (allowedValues.length === 1) {
