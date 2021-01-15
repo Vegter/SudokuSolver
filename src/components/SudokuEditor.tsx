@@ -12,9 +12,12 @@ import { Default } from "../config"
 import SudokuPossibilities from "./SudokuPossibilities"
 import { getStyle } from "../types/SudokuStyler"
 import { Box, Grid } from "@material-ui/core"
+import SudokuActionProposal from "./SudokuActionProposal"
+import { SudokuAction } from "../types/SudokuStrategies/SudokuAction"
 
 export interface SudokuEditorProps {
     sudoku: Sudoku,
+    helper: SudokuHelper
 }
 
 const CELL_WIDTH = 35
@@ -24,8 +27,7 @@ export function SudokuEditor(props:SudokuEditorProps) {
     const [change, setChange] = useState("")
     const [options, setOptions] = useState(Default.options)
 
-    const { sudoku } = props
-    const helper = new SudokuHelper(sudoku)
+    const { sudoku, helper } = props
 
     const useStyles = makeStyles({
         table: {
@@ -49,8 +51,7 @@ export function SudokuEditor(props:SudokuEditorProps) {
     const classes = useStyles();
 
     const getKey = (index: SudokuIndex, value: SudokuValue) => {
-        const allowedValues = helper.allowedValues(index).join('')
-        return `${index.row}.${index.col}.${value}.${allowedValues}`
+        return `${index.row}.${index.col}.${value}`
     }
 
     const onChange = (index: SudokuIndex, value: SudokuValue) => {
@@ -71,14 +72,15 @@ export function SudokuEditor(props:SudokuEditorProps) {
         })
     }
 
+    const onAction = (actions: SudokuAction[]) => {
+        helper.applyActions(actions)
+        setChange(actions.map(action => action.index.id).join(','))
+    }
+
     const onErase = () => {
         sudoku.clear()
         setChange("Clear")
     }
-
-    // const values = sudoku.indexes
-    //     .filter(index => sudoku.getValue(index) !== null)
-    //     .map(index => [index.row, index.col, sudoku.getValue(index)])
 
     return (
         <div>
@@ -96,6 +98,7 @@ export function SudokuEditor(props:SudokuEditorProps) {
                                 const key = getKey(index, sudoku.getValue(index))
                                 const style = getStyle(sudoku, index)
                                 if (key === change) {
+                                    // Mark last changed index
                                     style.backgroundColor = "LightBlue"
                                 }
                                 return (
@@ -109,6 +112,11 @@ export function SudokuEditor(props:SudokuEditorProps) {
                                                     options={options}
                                                     index={index}
                                                     onChange={onChange}/>
+                                        <SudokuActionProposal sudoku={sudoku}
+                                                              sudokuHelper={helper}
+                                                              options={options}
+                                                              index={index}
+                                                              onAction={onAction}/>
                                         <SudokuCellEditor sudoku={sudoku}
                                                           sudokuOptions={options}
                                                           index={index}

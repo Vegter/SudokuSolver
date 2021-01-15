@@ -2,9 +2,9 @@ import React from 'react'
 import { Sudoku, SudokuIndex } from "../types/Sudoku"
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles"
 import { SudokuHelper } from "../types/SudokuHelper"
-import { SudokuValue } from "../types/SudokuCell"
 import { IconButton } from "@material-ui/core"
 import { SudokuOptions } from "../config"
+import { SudokuAction } from "../types/SudokuStrategies/SudokuAction"
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -18,28 +18,31 @@ const useStyles = makeStyles((theme: Theme) =>
     }),
 );
 
-export interface SudokuHintProps {
+export interface SudokuActionProposalProps {
     sudoku: Sudoku,
     sudokuHelper: SudokuHelper,
     options: SudokuOptions,
     index: SudokuIndex
-    onChange: (index: SudokuIndex, value: SudokuValue) => SudokuValue
+    onAction: (actions: SudokuAction[]) => void
 }
 
-function SudokuHint(props: SudokuHintProps) {
+function SudokuActionProposal(props: SudokuActionProposalProps) {
     const classes = useStyles();
     const { sudoku, sudokuHelper, options, index } = props
     const value = sudoku.getValue(index)
 
     const allowedValues = sudokuHelper.allowedValues(index)
+    const actionProposals = sudokuHelper.actions[index.id] || []
 
-    if (value !== null || !options.Hint || allowedValues.length !== 1) {
+    if (value !== null || !options.Hint || allowedValues.length === 1 || actionProposals.length === 0) {
         // Nothing for existing values
         return null
     }
 
-    const onProposalClick = (proposal:number) => {
-        props.onChange(index, proposal)
+    const title = Array.from(new Set(actionProposals.map(proposal => proposal.motivation))).join(', ')
+
+    const onProposalClick = (actions: SudokuAction[]) => {
+        props.onAction(actions)
     }
 
     return (
@@ -47,10 +50,11 @@ function SudokuHint(props: SudokuHintProps) {
             className={classes.root}
             size={"small"}
             color={"secondary"}
-            onClick={() => onProposalClick(allowedValues[0]!)}>
-            ?
+            onClick={() => onProposalClick(actionProposals)}
+            title={title}>
+            !
         </IconButton>
     )
 }
 
-export default SudokuHint
+export default SudokuActionProposal
